@@ -1,0 +1,177 @@
+version: "2"
+networks:
+  fabricnetwork: {}
+services:
+  ca.sim.blockchain.net:
+    container_name: ca.sim.blockchain.net
+    extends:
+      file: base.yaml
+      service: ca
+    environment:
+    - FABRIC_CA_SERVER_CA_NAME=SimCA
+    - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.sim.blockchain.net-cert.pem
+    - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/SIM_PRIVATE_KEY
+    - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.sim.blockchain.net-cert.pem
+    - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/SIM_PRIVATE_KEY
+    working_dir: /opt/ws
+    volumes:
+    - ./crypto-config/peerOrganizations/sim.blockchain.net/ca/:/etc/hyperledger/fabric-ca-server-config
+    - ./:/opt/ws
+    - ./ca-sim/fabric-ca-server.db:/etc/hyperledger/fabric-ca-server/fabric-ca-server.db
+    ports:
+    - 20178:7054
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1
+  ca.vion.blockchain.net:
+    container_name: ca.vion.blockchain.net
+    extends:
+      file: base.yaml
+      service: ca
+    environment:
+    - FABRIC_CA_SERVER_CA_NAME=VionCA
+    - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.vion.blockchain.net-cert.pem
+    - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/VION_PRIVATE_KEY
+    - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.vion.blockchain.net-cert.pem
+    - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/VION_PRIVATE_KEY
+    working_dir: /opt/ws
+    volumes:
+    - ./crypto-config/peerOrganizations/vion.blockchain.net/ca/:/etc/hyperledger/fabric-ca-server-config
+    - ./:/opt/ws
+    - ./ca-vion/fabric-ca-server.db:/etc/hyperledger/fabric-ca-server/fabric-ca-server.db
+    ports:
+    - 20177:7054
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1
+  cli:
+    image: hyperledger/fabric-tools:${TOOLS_TAG}
+    container_name: cli
+    tty: true
+    environment:
+    - CORE_PEER_TLS_ENABLED=true
+    - GOPATH=/opt/gopath
+    - FABRIC_LOGGING_SPEC=DEBUG
+    - CORE_PEER_ID=cli
+    - GODEBUG=netdns=go
+    working_dir: /opt/ws
+    volumes:
+    - /var/run/:/host/var/run/
+    - ./:/opt/ws
+    - ./chaincode/github.com:/opt/gopath/src/github.com
+    depends_on:
+    - orderer0.blockchain.net
+    - peer0.vion.blockchain.net
+    - peer0.sim.blockchain.net
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1
+  couch0:
+    container_name: couch0
+    extends:
+      file: base.yaml
+      service: couchdb
+    volumes:
+    - ./worldstate/couch0:/opt/couchdb/data
+    ports:
+    - 20117:5984
+    networks:
+    - fabricnetwork
+  couch1:
+    container_name: couch1
+    extends:
+      file: base.yaml
+      service: couchdb
+    volumes:
+    - ./worldstate/couch1:/opt/couchdb/data
+    ports:
+    - 20118:5984
+    networks:
+    - fabricnetwork
+  orderer0.blockchain.net:
+    container_name: orderer0.blockchain.net
+    extends:
+      file: base.yaml
+      service: orderer
+    volumes:
+    - ./blocks/orderer0blockchainnet:/var/hyperledger/production/orderer
+    - ./genesis.block:/var/hyperledger/orderer/genesis.block
+    - ./crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/msp:/var/hyperledger/orderer/msp
+    - ./crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/:/var/hyperledger/orderer/tls
+    ports:
+    - 20235:7050
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1
+  peer0.sim.blockchain.net:
+    container_name: peer0.sim.blockchain.net
+    extends:
+      file: base.yaml
+      service: peer
+    environment:
+    - CORE_PEER_ID=peer0.sim.blockchain.net
+    - CORE_PEER_ADDRESS=peer0.sim.blockchain.net:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0.sim.blockchain.net:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.sim.blockchain.net:7051
+    - CORE_PEER_EVENTS_ADDRESS=peer0.sim.blockchain.net:7053
+    - CORE_PEER_LOCALMSPID=SimMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch1:5984
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+    - CORE_CHAINCODE_MODE=net
+    - CORE_PEER_NETWORKID=bc
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.sim.blockchain.net:7051
+    volumes:
+    - ./blocks/peer0simblockchainnet:/var/hyperledger/production
+    - /var/run/:/host/var/run/
+    - ./crypto-config/peerOrganizations/sim.blockchain.net/peers/peer0.sim.blockchain.net/msp:/etc/hyperledger/fabric/msp
+    - ./crypto-config/peerOrganizations/sim.blockchain.net/peers/peer0.sim.blockchain.net/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 20003:7051
+    - 20004:7053
+    depends_on:
+    - couch1
+    - orderer0.blockchain.net
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1
+  peer0.vion.blockchain.net:
+    container_name: peer0.vion.blockchain.net
+    extends:
+      file: base.yaml
+      service: peer
+    environment:
+    - CORE_PEER_ID=peer0.vion.blockchain.net
+    - CORE_PEER_ADDRESS=peer0.vion.blockchain.net:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0.vion.blockchain.net:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.vion.blockchain.net:7051
+    - CORE_PEER_EVENTS_ADDRESS=peer0.vion.blockchain.net:7053
+    - CORE_PEER_LOCALMSPID=VionMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch0:5984
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+    - CORE_CHAINCODE_MODE=net
+    - CORE_PEER_NETWORKID=bc
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.vion.blockchain.net:7051
+    volumes:
+    - ./blocks/peer0vionblockchainnet:/var/hyperledger/production
+    - /var/run/:/host/var/run/
+    - ./crypto-config/peerOrganizations/vion.blockchain.net/peers/peer0.vion.blockchain.net/msp:/etc/hyperledger/fabric/msp
+    - ./crypto-config/peerOrganizations/vion.blockchain.net/peers/peer0.vion.blockchain.net/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 20001:7051
+    - 20002:7053
+    depends_on:
+    - couch0
+    - orderer0.blockchain.net
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - myhost:127.0.0.1

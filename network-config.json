@@ -1,0 +1,73 @@
+{
+    "fabricVersion": "1.4.2",
+    "orderers": {
+        "name": "Orderer",
+        "mspID": "OrdererMSP",
+        "domain": "blockchain.net",
+        "ordererHostname": "orderer",
+        "SANS": "localhost",
+        "caCountry": "NY",
+        "caProvince": "NY-Prov",
+        "caLocality": "NY-local",
+        "caOrganizationalUnit": "IT",
+        "caStreetAddress": "dummy address",
+        "caPostalCode": "1000000",
+        "type": "raft",
+        "haCount": 1
+    },
+    "addCA": "true",
+    "startPort": 20000,
+    "orgs": [
+        {
+            "name": "Vion",
+            "domain": "vion.blockchain.net",
+            "mspID": "VionMSP",
+            "SANS": "localhost",
+            "caCountry": "NY",
+            "caProvince": "NY-Prov",
+            "caLocality": "NY-local",
+            "caOrganizationalUnit": "IT",
+            "caStreetAddress": "dummy address",
+            "caPostalCode": "1000000",
+            "peerCount": 1,
+            "userCount": 1
+        },        
+        {
+            "name": "Sim",
+            "domain": "sim.blockchain.net",
+            "mspID": "SimMSP",
+            "SANS": "localhost",
+            "caCountry": "NY",
+            "caProvince": "NY-Prov",
+            "caLocality": "NY-local",
+            "caOrganizationalUnit": "IT",
+            "caStreetAddress": "dummy address",
+            "caPostalCode": "1000000",
+            "peerCount": 1,
+            "userCount": 1
+        }
+
+    ],
+    "consortium": "VionsimConsortium",
+    "channels": [
+        {
+            "channelName": "Vionsim",
+            "orgs": [
+                "Vion",
+                "Sim"
+            ]
+        }
+    ],
+    "chaincodes": [
+        {
+            "channelName": "Vionsim",
+            "ccid": "bt",
+            "version": "1.0",
+            "src": "github.com/bt",
+            "participants": [
+                "Vion",
+                "Sim"
+            ]
+        }
+    ]
+}

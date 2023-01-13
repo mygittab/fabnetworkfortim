@@ -1,0 +1,161 @@
+
+Organizations:
+    - &OrdererOrg
+            Name: OrdererMSP
+            ID: OrdererMSP
+            MSPDir: crypto-config/ordererOrganizations/blockchain.net/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.member')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.member')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.admin')"
+
+    
+    - &VionOrg
+            Name: VionMSP
+            ID: VionMSP
+            MSPDir: crypto-config/peerOrganizations/vion.blockchain.net/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('VionMSP.admin', 'VionMSP.peer', 'VionMSP.client' )"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('VionMSP.admin', 'VionMSP.client' )"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('VionMSP.admin')"
+            AnchorPeers:
+              - Host: peer0.vion.blockchain.net
+                Port: 7051
+    
+    - &SimOrg
+            Name: SimMSP
+            ID: SimMSP
+            MSPDir: crypto-config/peerOrganizations/sim.blockchain.net/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('SimMSP.admin', 'SimMSP.peer', 'SimMSP.client' )"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('SimMSP.admin', 'SimMSP.client' )"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('SimMSP.admin')"
+            AnchorPeers:
+              - Host: peer0.sim.blockchain.net
+                Port: 7051
+    
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_4_2: true
+    Orderer: &OrdererCapabilities
+        V1_4_2: true
+    Application: &ApplicationCapabilities
+        V1_4_2: true
+        V1_2: false
+        V1_1: false
+
+Application: &ApplicationDefaults
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: etcdraft
+    Addresses:
+          - orderer0.blockchain.net:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 98 MB
+        PreferredMaxBytes: 1024 KB
+    EtcdRaft:
+        Consenters:
+          
+            - Host: orderer0.blockchain.net
+              Port: 7050
+              ClientTLSCert: crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/server.crt
+              ServerTLSCert: crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/server.crt
+           
+    Organizations:
+        - *OrdererOrg
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    Capabilities:
+        <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    OrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities 
+        Consortiums:
+            VionsimConsortium:
+                Organizations:
+                   - *VionOrg
+                   - *SimOrg
+                   
+        
+    
+    Vionsim:
+        Consortium: VionsimConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+              - *VionOrg
+              - *SimOrg
+              
+            Capabilities:
+              <<: *ApplicationCapabilities
+    
+        
+

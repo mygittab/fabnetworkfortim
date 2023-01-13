@@ -1,0 +1,11 @@
+{
+  "ca.sim.blockchain.net-0": "20178:7054",
+  "ca.vion.blockchain.net-0": "20177:7054",
+  "couch0-0": "20117:5984",
+  "couch1-0": "20118:5984",
+  "orderer0.blockchain.net": "20235:7050",
+  "peer0.sim.blockchain.net-0": "20003:7051",
+  "peer0.sim.blockchain.net-1": "20004:7053",
+  "peer0.vion.blockchain.net-0": "20001:7051",
+  "peer0.vion.blockchain.net-1": "20002:7053"
+}

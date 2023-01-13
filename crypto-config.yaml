@@ -1,0 +1,51 @@
+OrdererOrgs:
+- CA:
+    Country: NY
+    Locality: NY-local
+    OrganizationalUnit: IT
+    PostalCode: "1000000"
+    Province: NY-Prov
+    StreetAddress: dummy address
+  Domain: blockchain.net
+  Name: Orderer
+  Specs:
+  - SANS:
+    - localhost
+  Template:
+    Count: 1
+    Hostname: orderer{{.Index}}
+PeerOrgs:
+- CA:
+    Country: NY
+    Hostname: ca
+    Locality: NY-local
+    OrganizationalUnit: IT
+    PostalCode: "1000000"
+    Province: NY-Prov
+    StreetAddress: dummy address
+  Domain: vion.blockchain.net
+  EnableNodeOUs: true
+  Name: Vion
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+  Users:
+    Count: 1
+- CA:
+    Country: NY
+    Hostname: ca
+    Locality: NY-local
+    OrganizationalUnit: IT
+    PostalCode: "1000000"
+    Province: NY-Prov
+    StreetAddress: dummy address
+  Domain: sim.blockchain.net
+  EnableNodeOUs: true
+  Name: Sim
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+  Users:
+    Count: 1
