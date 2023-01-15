@@ -15,6 +15,17 @@ services:
     - LICENSE=accept
     - COUCHDB_USER=admin
     - COUCHDB_PASSWORD=adminpw
+  kafka:
+    image: hyperledger/fabric-kafka:${KAFKA_TAG}
+    restart: always
+    environment:
+    - KAFKA_MESSAGE_MAX_BYTES=103809024
+    - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024
+    - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+    - GODEBUG=netdns=go
+    - LICENSE=accept
+    ports:
+    - "9092"
   orderer:
     image: hyperledger/fabric-orderer:${IMAGE_TAG}
     environment:
@@ -28,9 +39,10 @@ services:
     - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
     - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
     - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-    - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-    - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-    - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+    - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+    - ORDERER_KAFKA_VERBOSE=true
+    - ORDERER_KAFKA_VERSION=0.9.0.1
     - GODEBUG=netdns=go
     - LICENSE=accept
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
@@ -53,3 +65,13 @@ services:
     - LICENSE=accept
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
+  zookeeper:
+    image: hyperledger/fabric-zookeeper:${ZK_TAG}
+    restart: always
+    environment:
+    - GODEBUG=netdns=go
+    - LICENSE=accept
+    ports:
+    - "2181"
+    - "2888"
+    - "3888"

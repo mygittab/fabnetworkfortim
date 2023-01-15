@@ -91,6 +91,70 @@ services:
     - 20118:5984
     networks:
     - fabricnetwork
+  kafka0:
+    container_name: kafka0
+    extends:
+      file: base.yaml
+      service: kafka
+    environment:
+    - KAFKA_BROKER_ID=0
+    - KAFKA_MIN_INSYNC_REPLICAS=2
+    - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+    depends_on:
+    - zookeeper0
+    - zookeeper1
+    - zookeeper2
+    networks:
+    - fabricnetwork
+  kafka1:
+    container_name: kafka1
+    extends:
+      file: base.yaml
+      service: kafka
+    environment:
+    - KAFKA_BROKER_ID=1
+    - KAFKA_MIN_INSYNC_REPLICAS=2
+    - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+    depends_on:
+    - zookeeper0
+    - zookeeper1
+    - zookeeper2
+    networks:
+    - fabricnetwork
+  kafka2:
+    container_name: kafka2
+    extends:
+      file: base.yaml
+      service: kafka
+    environment:
+    - KAFKA_BROKER_ID=2
+    - KAFKA_MIN_INSYNC_REPLICAS=2
+    - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+    depends_on:
+    - zookeeper0
+    - zookeeper1
+    - zookeeper2
+    networks:
+    - fabricnetwork
+  kafka3:
+    container_name: kafka3
+    extends:
+      file: base.yaml
+      service: kafka
+    environment:
+    - KAFKA_BROKER_ID=3
+    - KAFKA_MIN_INSYNC_REPLICAS=2
+    - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+    depends_on:
+    - zookeeper0
+    - zookeeper1
+    - zookeeper2
+    networks:
+    - fabricnetwork
   orderer0.blockchain.net:
     container_name: orderer0.blockchain.net
     extends:
@@ -103,6 +167,11 @@ services:
     - ./crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/:/var/hyperledger/orderer/tls
     ports:
     - 20235:7050
+    depends_on:
+    - kafka0
+    - kafka1
+    - kafka2
+    - kafka3
     networks:
     - fabricnetwork
     extra_hosts:
@@ -175,3 +244,33 @@ services:
     - fabricnetwork
     extra_hosts:
     - myhost:127.0.0.1
+  zookeeper0:
+    container_name: zookeeper0
+    extends:
+      file: base.yaml
+      service: zookeeper
+    environment:
+    - ZOO_MY_ID=1
+    - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+    networks:
+    - fabricnetwork
+  zookeeper1:
+    container_name: zookeeper1
+    extends:
+      file: base.yaml
+      service: zookeeper
+    environment:
+    - ZOO_MY_ID=2
+    - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+    networks:
+    - fabricnetwork
+  zookeeper2:
+    container_name: zookeeper2
+    extends:
+      file: base.yaml
+      service: zookeeper
+    environment:
+    - ZOO_MY_ID=3
+    - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+    networks:
+    - fabricnetwork

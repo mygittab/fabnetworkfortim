@@ -1,7 +1,3 @@
-##fabric network config upwork project
-##effort: 2 days to create the scripts 
-
-
 ## Installation steps Unzip and place the contents generated in a directory. 
 The directory is referred as <network>.  
 All the commands must be executed from  <network> directory.  

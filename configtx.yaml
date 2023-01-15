@@ -55,11 +55,11 @@ Organizations:
 
 Capabilities:
     Channel: &ChannelCapabilities
-        V1_4_2: true
+        V1_3: true
     Orderer: &OrdererCapabilities
-        V1_4_2: true
+        V1_1: true
     Application: &ApplicationCapabilities
-        V1_4_2: true
+        V1_3: true
         V1_2: false
         V1_1: false
 
@@ -81,7 +81,7 @@ Application: &ApplicationDefaults
         <<: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults
-    OrdererType: etcdraft
+    OrdererType: kafka
     Addresses:
           - orderer0.blockchain.net:7050
     BatchTimeout: 2s
@@ -89,16 +89,14 @@ Orderer: &OrdererDefaults
         MaxMessageCount: 10
         AbsoluteMaxBytes: 98 MB
         PreferredMaxBytes: 1024 KB
-    EtcdRaft:
-        Consenters:
-          
-            - Host: orderer0.blockchain.net
-              Port: 7050
-              ClientTLSCert: crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/server.crt
-              ServerTLSCert: crypto-config/ordererOrganizations/blockchain.net/orderers/orderer0.blockchain.net/tls/server.crt
-           
+    Kafka:
+        Brokers:
+            - kafka0:9092
+            - kafka1:9092
+            - kafka2:9092
+            - kafka3:9092
     Organizations:
-        - *OrdererOrg
+
     Policies:
         Readers:
             Type: ImplicitMeta
